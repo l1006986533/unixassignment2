@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <pthread.h>
 
 #define MAX_POINTS 4096
 #define MAX_CLUSTERS 32
@@ -71,7 +72,17 @@ int get_closest_centroid(int i, int k)  // time complexity: k
     return nearest_cluster;
 }
 
-bool to_parallel_func(int begin, int end){
+typedef struct
+{
+    int begin;
+    int end;
+} rows_to_process;
+
+
+void* to_parallel_func(void* arg){
+    rows_to_process* tmp = (rows_to_process*)arg;
+    int begin=tmp->begin;
+    int end=tmp->end;
     bool something_changed_in_thread = false;
     for (int i = begin; i < end; i++)
     { // For each data point
@@ -83,18 +94,27 @@ bool to_parallel_func(int begin, int end){
             something_changed_in_thread = true;
         }
     }
-    return something_changed_in_thread;
+    free(tmp);
+    return (void*)something_changed_in_thread;
 }
 
 bool assign_clusters_to_points() // c: N*k
 {
     bool something_changed = false;
     int NUM_THREADS = 4;
-    for (int thread_num = 0; thread_num < 4; thread_num++)
+    pthread_t threads[NUM_THREADS];
+    for (int thread_num = 0; thread_num < NUM_THREADS; thread_num++)
     {
         int begin = N / NUM_THREADS * thread_num;
-        int end = (thread_num == 4) ? N - 1 : N / NUM_THREADS * (thread_num + 1) - 1;
-        bool thread_result = to_parallel_func(begin, end);
+        int end = (thread_num == NUM_THREADS - 1) ? N : N / NUM_THREADS * (thread_num + 1);
+        rows_to_process* tmp = malloc(sizeof(rows_to_process));
+        tmp->begin=begin;
+        tmp->end  =end;
+        pthread_create(&threads[thread_num], NULL, to_parallel_func, tmp); //only one variable for the forth parameter of pthread_create
+    }
+    bool thread_result;
+    for(int t=0; t < NUM_THREADS; t++) {
+        pthread_join(threads[t], (void**)&thread_result);
         something_changed = something_changed || thread_result;
     }
     return something_changed;
