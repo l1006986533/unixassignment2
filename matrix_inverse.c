@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #define MAX_SIZE 4096
 
@@ -44,8 +45,18 @@ int main(int argc, char** argv)
     }
 }
 
-void parallel_func(int begin, int end, int p){
-    for (int row = begin; row < end; row++) {   //pick row 
+typedef struct
+{
+    int begin; 
+    int end;
+    int p;   // p means column to eliminate
+} elimination;
+
+
+void* parallel_func(void* arg){
+    elimination* tmp=arg;
+    int p=tmp->p;
+    for (int row = tmp->begin; row < tmp->end; row++) {   //pick row 
         double multiplier = A[row][p];
         if (row != p) // Perform elimination on all except the current pivot row 
         {
@@ -57,6 +68,7 @@ void parallel_func(int begin, int end, int p){
             assert(A[row][p] == 0.0);
         }
     }
+    free(tmp);
 }
 
 void find_inverse() // time complexity: N*N*N
@@ -75,11 +87,19 @@ void find_inverse() // time complexity: N*N*N
         assert(A[p][p] == 1.0);
 
         int NUM_THREADS = 4;
+        pthread_t threads[NUM_THREADS];
+
         for (int thread_num = 0; thread_num < NUM_THREADS; thread_num++)
         {
             int begin = N / NUM_THREADS * thread_num;
             int end = (thread_num == NUM_THREADS - 1) ? N : N / NUM_THREADS * (thread_num + 1);
-            parallel_func(begin, end, p);  // p means column to eliminate
+            elimination* pack = malloc(sizeof(elimination));
+            pack->begin=begin; pack->end=end; pack->p=p;
+            pthread_create(&threads[thread_num], NULL, parallel_func, pack);
+        }
+
+        for(int t = 0; t < NUM_THREADS; t++) {
+            pthread_join(threads[t], NULL);
         }
     }
 }

@@ -108,8 +108,7 @@ bool assign_clusters_to_points() // c: N*k
         int begin = N / NUM_THREADS * thread_num;
         int end = (thread_num == NUM_THREADS - 1) ? N : N / NUM_THREADS * (thread_num + 1);
         rows_to_process* tmp = malloc(sizeof(rows_to_process));
-        tmp->begin=begin;
-        tmp->end  =end;
+        tmp->begin=begin;  tmp->end=end;
         pthread_create(&threads[thread_num], NULL, to_parallel_func, tmp); //only one variable for the forth parameter of pthread_create
     }
     bool thread_result;
