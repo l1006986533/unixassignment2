@@ -48,7 +48,7 @@ void read_data()
     fclose(fp);
 }
 
-int get_closest_centroid(int i, int k)
+int get_closest_centroid(int i, int k)  // time complexity: k
 {
     /* find the nearest centroid */
     int nearest_cluster = -1;
@@ -71,24 +71,36 @@ int get_closest_centroid(int i, int k)
     return nearest_cluster;
 }
 
-bool assign_clusters_to_points()
-{
-    bool something_changed = false;
-    int old_cluster = -1, new_cluster = -1;
-    for (int i = 0; i < N; i++)
+bool to_parallel_func(int begin, int end){
+    bool something_changed_in_thread = false;
+    for (int i = begin; i < end; i++)
     { // For each data point
-        old_cluster = data[i].cluster;
-        new_cluster = get_closest_centroid(i, k);
+        int old_cluster = data[i].cluster;
+        int new_cluster = get_closest_centroid(i, k);
         data[i].cluster = new_cluster; // Assign a cluster to the point i
         if (old_cluster != new_cluster)
         {
-            something_changed = true;
+            something_changed_in_thread = true;
         }
+    }
+    return something_changed_in_thread;
+}
+
+bool assign_clusters_to_points() // c: N*k
+{
+    bool something_changed = false;
+    int NUM_THREADS = 4;
+    for (int thread_num = 0; thread_num < 4; thread_num++)
+    {
+        int begin = N / NUM_THREADS * thread_num;
+        int end = (thread_num == 4) ? N - 1 : N / NUM_THREADS * (thread_num + 1) - 1;
+        bool thread_result = to_parallel_func(begin, end);
+        something_changed = something_changed || thread_result;
     }
     return something_changed;
 }
 
-void update_cluster_centers()
+void update_cluster_centers() //c: N+k
 {
     /* Update the cluster centers */
     int c;
