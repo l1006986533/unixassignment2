@@ -44,33 +44,42 @@ int main(int argc, char** argv)
     }
 }
 
+void parallel_func(int begin, int end, int p){
+    for (int row = begin; row < end; row++) {   //pick row 
+        double multiplier = A[row][p];
+        if (row != p) // Perform elimination on all except the current pivot row 
+        {
+            for (int col = 0; col < N; col++) //operating every number in this row  /  every column in one row   parallel
+            {
+                A[row][col] = A[row][col] - A[p][col] * multiplier; /* Elimination step on A */
+                I[row][col] = I[row][col] - I[p][col] * multiplier; /* Elimination step on I */
+            }      
+            assert(A[row][p] == 0.0);
+        }
+    }
+}
+
 void find_inverse() // time complexity: N*N*N
 {
-    int row, col, p; // 'p' stands for pivot (numbered from 0 to N-1)
+    int row, p; // 'p' stands for pivot (numbered from 0 to N-1)
     double pivalue; // pivot value
 
     /* Bringing the matrix A to the identity form */
     for (p = 0; p < N; p++) { /* Outer loop */     //pick col
         pivalue = A[p][p];
-        for (col = 0; col < N; col++)
+        for (int col = 0; col < N; col++)
         {
             A[p][col] = A[p][col] / pivalue; /* Division step on A */
             I[p][col] = I[p][col] / pivalue; /* Division step on I */
         }
         assert(A[p][p] == 1.0);
 
-        double multiplier;
-        for (row = 0; row < N; row++) {   //pick row 
-            multiplier = A[row][p];
-            if (row != p) // Perform elimination on all except the current pivot row 
-            {
-                for (col = 0; col < N; col++) //operating every number in this row  /  every column in one row   parallel
-                {
-                    A[row][col] = A[row][col] - A[p][col] * multiplier; /* Elimination step on A */
-                    I[row][col] = I[row][col] - I[p][col] * multiplier; /* Elimination step on I */
-                }      
-                assert(A[row][p] == 0.0);
-            }
+        int NUM_THREADS = 4;
+        for (int thread_num = 0; thread_num < NUM_THREADS; thread_num++)
+        {
+            int begin = N / NUM_THREADS * thread_num;
+            int end = (thread_num == NUM_THREADS - 1) ? N : N / NUM_THREADS * (thread_num + 1);
+            parallel_func(begin, end, p);  // p means column to eliminate
         }
     }
 }
