@@ -1,7 +1,7 @@
 /***************************************************************************
  *
  * Sequential version of Matrix Inverse
- * An adapted version of the code by Håkan Grahn
+ * An adapted version of the code by Hï¿½kan Grahn
  ***************************************************************************/
 
 #include <stdio.h>
@@ -17,7 +17,7 @@ int	N;		/* matrix size		*/
 int	maxnum;		/* max number of element*/
 char* Init;		/* matrix init type	*/
 int	PRINT;		/* print switch		*/
-matrix	A;		/* matrix A		*/
+matrix A;		/* matrix A		*/
 matrix I = {0.0};  /* The A inverse matrix, which will be initialized to the identity matrix */
 
 /* forward declarations */
@@ -27,8 +27,7 @@ void Print_Matrix(matrix M, char name[]);
 void Init_Default(void);
 int Read_Options(int, char**);
 
-int
-main(int argc, char** argv)
+int main(int argc, char** argv)
 {
     printf("Matrix Inverse\n");
     int i, timestart, timeend, iter;
@@ -45,13 +44,13 @@ main(int argc, char** argv)
     }
 }
 
-void find_inverse()
+void find_inverse() // time complexity: N*N*N
 {
     int row, col, p; // 'p' stands for pivot (numbered from 0 to N-1)
     double pivalue; // pivot value
 
     /* Bringing the matrix A to the identity form */
-    for (p = 0; p < N; p++) { /* Outer loop */
+    for (p = 0; p < N; p++) { /* Outer loop */     //pick col
         pivalue = A[p][p];
         for (col = 0; col < N; col++)
         {
@@ -61,11 +60,11 @@ void find_inverse()
         assert(A[p][p] == 1.0);
 
         double multiplier;
-        for (row = 0; row < N; row++) {
+        for (row = 0; row < N; row++) {   //pick row 
             multiplier = A[row][p];
             if (row != p) // Perform elimination on all except the current pivot row 
             {
-                for (col = 0; col < N; col++)
+                for (col = 0; col < N; col++) //operating every number in this row  /  every column in one row   parallel
                 {
                     A[row][col] = A[row][col] - A[p][col] * multiplier; /* Elimination step on A */
                     I[row][col] = I[row][col] - I[p][col] * multiplier; /* Elimination step on I */
@@ -76,8 +75,7 @@ void find_inverse()
     }
 }
 
-void
-Init_Matrix()
+void Init_Matrix()
 {
     int row, col;
 
@@ -124,8 +122,7 @@ Init_Matrix()
     }
 }
 
-void
-Print_Matrix(matrix M, char name[])
+void Print_Matrix(matrix M, char name[])
 {
     int row, col;
 
@@ -138,8 +135,7 @@ Print_Matrix(matrix M, char name[])
     printf("\n\n");
 }
 
-void
-Init_Default()
+void Init_Default()
 {
     N = 5;
     Init = "fast";
@@ -147,8 +143,7 @@ Init_Default()
     PRINT = 1;
 }
 
-int
-Read_Options(int argc, char** argv)
+int Read_Options(int argc, char** argv)
 {
     char* prog;
 
