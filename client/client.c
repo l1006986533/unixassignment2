@@ -50,14 +50,30 @@ int main(int argc, char const* argv[])
     char filename[255];
     msize = recv(cd, filename, sizeof(filename), 0);
     printf("Received the solution: %s\n", filename);
-
-    char strData[102400];
-    msize = recv(cd, strData, sizeof(strData), 0);
     
     char filepath[255]="results/";
     strcat(filepath,filename);
     FILE *file = fopen(filepath, "w");
-    fputs(strData, file);
+
+    char buffer[1024];
+    while(1){
+        msize = recv(cd, buffer, sizeof(buffer), 0);
+        if(msize == -1){
+            perror("Receive file chunk failed");
+            // handle error
+        }
+        else if(msize == 0){
+            // Connection closed
+            break;
+        }
+
+        // Write the received chunk to the file
+        size_t bytesWritten = fwrite(buffer, 1, msize, file);
+        if(bytesWritten < msize){
+            perror("Write file chunk failed");
+            // handle error
+        }
+    }
     fclose(file);
     
     return 0;

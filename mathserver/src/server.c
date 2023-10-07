@@ -162,18 +162,31 @@ void handle_client(int cd){
 
     FILE *file = fopen(filepath, "r");
 
-    fseek(file, 0, SEEK_END);
-    long fileSize = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    int msize = send(cd, filename, sizeof(filename), 0);
+    if(msize < 0){
+        perror("Send filename failed");
+        // handle error
+    }
 
-    char solution[102400];
-    fread(solution, 1, fileSize, file);
-    solution[fileSize] = '\0';
+    char buffer[1024];
+
+    while(!feof(file)){
+        size_t bytesRead = fread(buffer, 1, sizeof(buffer), file);
+        if(bytesRead < 0){
+            perror("Read file failed");
+            // handle error
+        }
+
+        char *p = buffer;
+        while(bytesRead > 0){
+            int bytesSent = send(cd, p, bytesRead, 0);
+            if(bytesSent <= 0){
+                perror("Send file chunk failed");
+                // handle error
+            }
+            bytesRead -= bytesSent;
+            p += bytesSent;
+        }
+    }
     fclose(file);
-
-    printf("Sending solution: %s\n",filename);
-    // First, send the filename
-    int msize = send(cd, filename, strlen(filename) + 1, 0);
-    // Then, send the content
-    msize = send(cd, solution, sizeof(solution), 0);
 }
