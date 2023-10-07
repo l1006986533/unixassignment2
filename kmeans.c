@@ -20,11 +20,11 @@ int k;      // number of centroids
 point data[MAX_POINTS];		// Data coordinates
 point cluster[MAX_CLUSTERS]; // The coordinates of each cluster center (also called centroid)
 
-void read_data()
+void read_data(char* filename)
 {
     N = 1797;
     k = 9;
-    FILE* fp = fopen("kmeans-data.txt", "r");
+    FILE* fp = fopen(filename, "r");
     if (fp == NULL) {
         perror("Cannot open the file");
         exit(EXIT_FAILURE);
@@ -168,11 +168,4 @@ void write_results()
         }
     }
     printf("Wrote the results to a file!\n");
-}
-
-int main()
-{
-    read_data(); 
-    kmeans(k);
-    write_results();
 }

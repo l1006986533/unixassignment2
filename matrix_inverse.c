@@ -9,10 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <pthread.h>
-
-#define MAX_SIZE 4096
-
-typedef double matrix[MAX_SIZE][MAX_SIZE];
+#include "matrix_inverse.h"
 
 int	N;		/* matrix size		*/
 int	maxnum;		/* max number of element*/
@@ -20,13 +17,6 @@ char* Init;		/* matrix init type	*/
 int	PRINT;		/* print switch		*/
 matrix A;		/* matrix A		*/
 matrix I = {0.0};  /* The A inverse matrix, which will be initialized to the identity matrix */
-
-/* forward declarations */
-void find_inverse(void);
-void Init_Matrix(void);
-void Print_Matrix(matrix M, char name[]);
-void Init_Default(void);
-int Read_Options(int, char**);
 
 int main(int argc, char** argv)
 {
