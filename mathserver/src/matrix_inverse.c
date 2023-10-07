@@ -18,23 +18,6 @@ int	PRINT;		/* print switch		*/
 matrix A;		/* matrix A		*/
 matrix I = {0.0};  /* The A inverse matrix, which will be initialized to the identity matrix */
 
-int main(int argc, char** argv)
-{
-    printf("Matrix Inverse\n");
-    int i, timestart, timeend, iter;
-
-    Init_Default();		/* Init default values	*/
-    Read_Options(argc, argv);	/* Read arguments	*/
-    Init_Matrix();		/* Init the matrix	*/
-    find_inverse();
-
-    if (PRINT == 1)
-    {
-        //Print_Matrix(A, "End: Input");
-        Print_Matrix(I, "Inversed");
-    }
-}
-
 typedef struct
 {
     int begin; 
@@ -94,7 +77,7 @@ void find_inverse() // time complexity: N*N*N
     }
 }
 
-void Init_Matrix()
+void Init_Matrix(FILE* fp)
 {
     int row, col;
 
@@ -107,10 +90,10 @@ void Init_Matrix()
         }
     }
 
-    printf("\nsize      = %dx%d ", N, N);
-    printf("\nmaxnum    = %d \n", maxnum);
-    printf("Init	  = %s \n", Init);
-    printf("Initializing matrix...");
+    fprintf(fp, "\nsize      = %dx%d ", N, N);
+    fprintf(fp, "\nmaxnum    = %d \n", maxnum);
+    fprintf(fp, "Init	  = %s \n", Init);
+    fprintf(fp, "Initializing matrix...");
 
     if (strcmp(Init, "rand") == 0) {
         for (row = 0; row < N; row++) {
@@ -133,7 +116,7 @@ void Init_Matrix()
         }
     }
 
-    printf("done \n\n");
+    fprintf(fp, "done \n\n");
     if (PRINT == 1)
     {
         //Print_Matrix(A, "Begin: Input");
@@ -141,17 +124,16 @@ void Init_Matrix()
     }
 }
 
-void Print_Matrix(matrix M, char name[])
-{
+void Save_Matrix_Result_As_File(FILE* fp){
+    
     int row, col;
-
-    printf("%s Matrix:\n", name);
     for (row = 0; row < N; row++) {
         for (col = 0; col < N; col++)
-            printf(" %5.2f", M[row][col]);
-        printf("\n");
+            fprintf(fp, " %5.2f", I[row][col]);
+        fprintf(fp, "\n");
     }
-    printf("\n\n");
+    fprintf(fp, "\n\n");
+    fclose(fp);
 }
 
 void Init_Default()

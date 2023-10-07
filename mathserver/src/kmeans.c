@@ -15,14 +15,14 @@ typedef struct point
     int cluster; // The cluster that the point belongs to
 } point;
 
-int	N;		// number of entries in the data
+int	N_points;		// number of entries in the data
 int k;      // number of centroids
 point data[MAX_POINTS];		// Data coordinates
 point cluster[MAX_CLUSTERS]; // The coordinates of each cluster center (also called centroid)
 
 void read_data(char* filename)
 {
-    N = 1797;
+    N_points = 1797;
     k = 9;
     FILE* fp = fopen(filename, "r");
     if (fp == NULL) {
@@ -32,7 +32,7 @@ void read_data(char* filename)
    
     // Initialize points from the data file
     float temp;
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < N_points; i++)
     {
         fscanf(fp, "%f %f", &data[i].x, &data[i].y);
         data[i].cluster = -1; // Initialize the cluster number to -1
@@ -42,7 +42,7 @@ void read_data(char* filename)
     srand(0); // Setting 0 as the random number generation seed
     for (int i = 0; i < k; i++)
     {
-        int r = rand() % N;
+        int r = rand() % N_points;
         cluster[i].x = data[r].x;
         cluster[i].y = data[r].y;
     }
@@ -105,8 +105,8 @@ bool assign_clusters_to_points() // c: N*k
     pthread_t threads[NUM_THREADS];
     for (int thread_num = 0; thread_num < NUM_THREADS; thread_num++)
     {
-        int begin = N / NUM_THREADS * thread_num;
-        int end = (thread_num == NUM_THREADS - 1) ? N : N / NUM_THREADS * (thread_num + 1);
+        int begin = N_points / NUM_THREADS * thread_num;
+        int end = (thread_num == NUM_THREADS - 1) ? N_points : N_points / NUM_THREADS * (thread_num + 1);
         rows_to_process* tmp = malloc(sizeof(rows_to_process));
         tmp->begin=begin;  tmp->end=end;
         pthread_create(&threads[thread_num], NULL, to_parallel_func, tmp); //only one variable for the forth parameter of pthread_create
@@ -126,7 +126,7 @@ void update_cluster_centers() //c: N+k
     int count[MAX_CLUSTERS] = { 0 }; // Array to keep track of the number of points in each cluster
     point temp[MAX_CLUSTERS] = { 0.0 };
 
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < N_points; i++)
     {
         c = data[i].cluster;
         count[c]++;
@@ -162,10 +162,11 @@ void write_results()
     }
     else
     {
-        for (int i = 0; i < N; i++)
+        for (int i = 0; i < N_points; i++)
         {
             fprintf(fp, "%.2f %.2f %d\n", data[i].x, data[i].y, data[i].cluster);
         }
     }
     printf("Wrote the results to a file!\n");
+    fclose(fp);
 }
