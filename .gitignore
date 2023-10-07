@@ -1,4 +1,5 @@
 .DS_Store
-kmeans
-kmeans-results.txt
+mathserver/object/kmeans-results.txt
 .vscode/
+client/client
+mathserver/object/server

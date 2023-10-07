@@ -77,7 +77,8 @@ void handle_client(int cd){
         strcpy(filename,"kmeans-data.txt");
         strcpy(filepath,"./kmeans-results.txt");
     } else{
-        printf("Not start with matinvpar or kmeanspar");
+        printf("Not start with matinvpar or kmeanspar\n");
+        return;
     }
 
     FILE *file = fopen(filepath, "r");
