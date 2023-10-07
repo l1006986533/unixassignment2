@@ -4,6 +4,7 @@
 #include <sys/socket.h> //for socket APIs
 #include <sys/types.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 int main(int argc, char const* argv[])
 {
@@ -12,22 +13,19 @@ int main(int argc, char const* argv[])
     char ip[255]="127.0.0.1";
     char* prog = *argv;
     while (++argv, --argc > 0)
-        if (**argv == '-')
-            switch (*++ * argv) {
-            case 'ip':
+        if (**argv == '-'){
+            if(strcmp(*argv,"-ip")==0){
                 --argc;
                 strcpy(ip, *++argv);
-                break;
-            case 'p':
+            }else if(strcmp(*argv,"-p")==0){
                 --argc;
                 port = atoi(*++argv);
-                break;
-            default:
+            }else{
                 printf("%s: ignored option: -%s\n", prog, *argv);
                 printf("HELP: try %s -h \n\n", prog);
-                break;
             }
-
+        }
+    printf("ip:%s,and port:%d\n",ip,port);
     int cd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in servAddr;
     servAddr.sin_family = AF_INET;

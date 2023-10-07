@@ -4,6 +4,8 @@
 #include <sys/socket.h> //for socket APIs
 #include <sys/types.h>
 #include <string.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 #include "kmeans.h"
 #include "matrix_inverse.h"
 
