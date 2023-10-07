@@ -17,7 +17,7 @@ $(CLIENT_TARGET): $(CLIENT_SRC)
 	$(CC) -w -o $@ $^
 
 $(SERVER_TARGET): $(SERVER_SRC)
-	$(CC) -w -I$(INCLUDE_PATH) -o $@ $^
+	$(CC) -w -I$(INCLUDE_PATH) -O2 -o $@ $^
 
 clean:
 	$(RM) $(CLIENT_TARGET) $(SERVER_TARGET)
