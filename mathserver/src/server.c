@@ -175,5 +175,3 @@ void handle_client(int cd){
     // Then, send the content
     msize = send(cd, solution, sizeof(solution), 0);
 }
-
-//szffgddxgfxgfgxf
