@@ -7,11 +7,32 @@
 
 int main(int argc, char const* argv[])
 {
+
+    int port=9999;
+    char ip[255]="127.0.0.1";
+    char* prog = *argv;
+    while (++argv, --argc > 0)
+        if (**argv == '-')
+            switch (*++ * argv) {
+            case 'ip':
+                --argc;
+                strcpy(ip, *++argv);
+                break;
+            case 'p':
+                --argc;
+                port = atoi(*++argv);
+                break;
+            default:
+                printf("%s: ignored option: -%s\n", prog, *argv);
+                printf("HELP: try %s -h \n\n", prog);
+                break;
+            }
+
     int cd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in servAddr;
     servAddr.sin_family = AF_INET;
-    servAddr.sin_port = htons(19009); // use some unused port number
-    servAddr.sin_addr.s_addr = INADDR_ANY;
+    servAddr.sin_port = htons(port);
+    inet_pton(AF_INET, ip, &servAddr.sin_addr);
     int status = connect(cd, (struct sockaddr*)&servAddr,
                   sizeof(servAddr));
   

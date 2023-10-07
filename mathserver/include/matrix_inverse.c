@@ -136,12 +136,12 @@ void Save_Matrix_Result_As_File(FILE* fp){
     fclose(fp);
 }
 
-void Init_Default()
+void Init_Default(int problemsize, char* Initway, int max_num, int p)
 {
-    N = 5;
-    Init = "fast";
-    maxnum = 15.0;
-    PRINT = 1;
+    N = problemsize;
+    Init = Initway;
+    maxnum = max_num;
+    PRINT = p;
 }
 
 int Read_Options(int argc, char** argv)

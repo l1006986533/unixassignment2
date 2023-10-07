@@ -29,15 +29,44 @@ void get_unique_filename(char* base_filename, int cd, char* result_filename) {
     }
 }
 
-int main(int argc, char const* argv[])
+int main(int argc, char** argv)
 {
+    int port=9999;
+
+    char* prog;
+
+    prog = *argv;
+    while (++argv, --argc > 0)
+        if (**argv == '-')
+            switch (*++ * argv) {
+            case 'h':
+                printf("-h Print help text");
+                printf("-p port Listen to port number port.");
+                printf("-d Run as a daemon instead of as a normal program.");
+                printf("-s strategy Specify the request handling strategy: fork, muxbasic, or muxscale");
+                exit(0);
+                break;
+            case 'p':
+                --argc;
+                port = atoi(*++argv);
+                break;
+            case 'd':
+                break;
+            case 's':
+                break;
+            default:
+                printf("%s: ignored option: -%s\n", prog, *argv);
+                printf("HELP: try %s -h \n\n", prog);
+                break;
+            }
+
     // Create a socket
     int sd = socket(AF_INET, SOCK_STREAM, 0);
   
     // define server address
     struct sockaddr_in servAddr;
     servAddr.sin_family = AF_INET;
-    servAddr.sin_port = htons(19009);
+    servAddr.sin_port = htons(port);
     servAddr.sin_addr.s_addr = INADDR_ANY;
 
     if(bind(sd, (struct sockaddr*)&servAddr, sizeof(servAddr))<0){  // Bind socket to the specified IP and port
@@ -78,23 +107,51 @@ void handle_client(int cd){
     char command[255];
     int nbytes = recv(cd, command, sizeof(command), 0);
     printf("Client %d commanded: %s", cd, command);
-
     char filepath[255]="../computed_results/";
     char filename[255];
     if (strncmp(command, "matinvpar", 9) == 0) {
+        
+        int problemsize=5,p=1,max_num=15;
+        char Initway[255]="fast";
+        char *token = strtok(command, " ");
+        while (token != NULL) {
+            if(strcmp(token,"-n")==0){
+                problemsize = atoi(strtok(NULL, " "));
+            }else if(strcmp(token,"-I")==0){
+                strcpy(Initway, strtok(NULL, " "));
+            }else if(strcmp(token,"-P")==0){
+                p = atoi(strtok(NULL, " "));
+            }else if(strcmp(token,"-m")==0){
+                max_num = atoi(strtok(NULL, " "));
+            }
+            token = strtok(NULL, " ");
+        }
+
         get_unique_filename("matinv", cd, filename);
         strcat(filepath, filename);
         FILE* fp = fopen(filepath, "w");
-        Init_Default();		/* Init default values	*/
-        // Read_Options(argc, argv);	/* Read arguments	*/
-        Init_Matrix(fp);		/* Init the matrix	*/
+        Init_Default(problemsize,Initway,max_num,p);
+        Init_Matrix(fp);
         find_inverse();
         Save_Matrix_Result_As_File(fp);
     } else if (strncmp(command, "kmeanspar", 9) == 0) {
+
+        int k;
+        char filename_kmeans[255]="kmeans-data.txt";
+        char *token = strtok(command, " ");
+        while (token != NULL) {
+            if(strcmp(token,"-k")==0){
+                k = atoi(strtok(NULL, " "));
+            }else if(strcmp(token,"-f")==0){
+                strcpy(filename_kmeans, strtok(NULL, " "));
+            }
+            token = strtok(NULL, " ");
+        }
+
         get_unique_filename("kmeans", cd, filename);
         strcat(filepath, filename);
-        read_data("kmeans-data.txt"); //filename
-        kmeans(9);  //k
+        read_data(filename_kmeans); //filename
+        kmeans(k);  //k
         write_results(filepath);
     } else{
         printf("Not start with matinvpar or kmeanspar\n");
