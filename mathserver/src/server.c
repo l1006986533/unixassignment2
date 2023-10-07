@@ -46,7 +46,7 @@ int main(int argc, char const* argv[])
     }
     // listen for connections
     int listenres=listen(sd, 1);
-    printf("Accepting connections...\n"); 
+    printf("Listening for clients...\n"); 
 
 
     while (1) {
