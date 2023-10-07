@@ -28,17 +28,16 @@ int main(int argc, char const* argv[])
     fgets(command, sizeof(command), stdin);
     int msize = send(cd, command, 255, 0);
 
-    char strToPrint[255];
-    if(strncmp(command, "matinvpar", 9) == 0) 
-        strcpy(strToPrint,"Received the solution: matinv_client1_soln1.txt\n");
-    else if (strncmp(command, "kmeanspar", 9) == 0)
-        strcpy(strToPrint,"Received the solution: kmeans_client1_soln1.txt\n");
+    char filename[255];
+    msize = recv(cd, filename, sizeof(filename), 0);
+    printf("Received the solution: %s\n", filename);
 
-    printf(strToPrint);
     char strData[102400];
     msize = recv(cd, strData, sizeof(strData), 0);
     
-    FILE *file = fopen("results/client1_results.txt", "w");
+    char filepath[255]="results/";
+    strcat(filepath,filename);
+    FILE *file = fopen(filepath, "w");
     fputs(strData, file);
     fclose(file);
     

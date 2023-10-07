@@ -153,9 +153,9 @@ int kmeans(int k)
     printf("Computed cluster numbers successfully!\n");
 }
 
-void write_results()
+void write_results(char* filename)
 {
-    FILE* fp = fopen("kmeans-results.txt", "w");
+    FILE* fp = fopen(filename, "w");
     if (fp == NULL) {
         perror("Cannot open the file");
         exit(EXIT_FAILURE);

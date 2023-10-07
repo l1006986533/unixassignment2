@@ -9,6 +9,26 @@
 
 void handle_client(int);
 
+int file_exists(const char* filename) {
+    char filepath[255]="../computed_results/";
+    strcat(filepath,filename);
+    FILE* file = fopen(filepath, "r");
+    if (file != NULL) {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
+
+void get_unique_filename(char* base_filename, int cd, char* result_filename) {
+    int counter=1;
+    sprintf(result_filename, "%s_client%d_soln%d.txt", base_filename, cd, counter);
+    while (file_exists(result_filename)) {
+        sprintf(result_filename, "%s_client%d_soln%d.txt", base_filename, cd, counter);
+        counter++;
+    }
+}
+
 int main(int argc, char const* argv[])
 {
     // Create a socket
@@ -57,25 +77,25 @@ void handle_client(int cd){
     // receiving command
     char command[255];
     int nbytes = recv(cd, command, sizeof(command), 0);
-    printf("Client 1 commanded: %s", command);
+    printf("Client %d commanded: %s", cd, command);
 
-    char filepath[255];
+    char filepath[255]="../computed_results/";
     char filename[255];
     if (strncmp(command, "matinvpar", 9) == 0) {
-        FILE* fp = fopen("matinv_client1_soln1.txt", "w");
+        get_unique_filename("matinv", cd, filename);
+        strcat(filepath, filename);
+        FILE* fp = fopen(filepath, "w");
         Init_Default();		/* Init default values	*/
         // Read_Options(argc, argv);	/* Read arguments	*/
         Init_Matrix(fp);		/* Init the matrix	*/
         find_inverse();
         Save_Matrix_Result_As_File(fp);
-        strcpy(filename,"matinv_client1_soln1.txt");
-        strcpy(filepath,"./matinv_client1_soln1.txt");
     } else if (strncmp(command, "kmeanspar", 9) == 0) {
+        get_unique_filename("kmeans", cd, filename);
+        strcat(filepath, filename);
         read_data("kmeans-data.txt"); //filename
         kmeans(9);  //k
-        write_results();
-        strcpy(filename,"kmeans-data.txt");
-        strcpy(filepath,"./kmeans-results.txt");
+        write_results(filepath);
     } else{
         printf("Not start with matinvpar or kmeanspar\n");
         return;
@@ -93,5 +113,8 @@ void handle_client(int cd){
     fclose(file);
 
     printf("Sending solution: %s\n",filename);
-    int msize = send(cd, solution, sizeof(solution), 0);
+    // First, send the filename
+    int msize = send(cd, filename, strlen(filename) + 1, 0);
+    // Then, send the content
+    msize = send(cd, solution, sizeof(solution), 0);
 }

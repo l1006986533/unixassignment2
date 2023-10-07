@@ -3,3 +3,5 @@ mathserver/object/kmeans-results.txt
 .vscode/
 client/client
 mathserver/object/server
+client/results/
+mathserver/computed_results/
