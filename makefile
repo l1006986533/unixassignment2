@@ -7,7 +7,9 @@ SERVER_TARGET = mathserver/object/server
 
 # Define the C source files
 CLIENT_SRC = client/client.c
-SERVER_SRC = mathserver/src/server.c mathserver/src/kmeans.c mathserver/src/matrix_inverse.c
+SERVER_SRC = mathserver/src/server.c mathserver/include/kmeans.c mathserver/include/matrix_inverse.c
+
+INCLUDE_PATH = mathserver/include
 
 all: $(CLIENT_TARGET) $(SERVER_TARGET)
 
@@ -15,7 +17,7 @@ $(CLIENT_TARGET): $(CLIENT_SRC)
 	$(CC) -w -o $@ $^
 
 $(SERVER_TARGET): $(SERVER_SRC)
-	$(CC) -w -o $@ $^
+	$(CC) -w -I$(INCLUDE_PATH) -o $@ $^
 
 clean:
 	$(RM) $(CLIENT_TARGET) $(SERVER_TARGET)
