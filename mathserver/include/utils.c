@@ -58,7 +58,7 @@ void handling_kmeans_args(char *command, int *k, char *filename_kmeans){
     }
 }
 
-void handle_matinv(char* command, char* filepath){
+void run_matinv(char* command, char* filepath){
     // set default value
     int problemsize = 5, p = 1, max_num = 15;
     char Initway[255] = "fast";
@@ -71,7 +71,7 @@ void handle_matinv(char* command, char* filepath){
     Save_Matrix_Result_As_File(fp);
 }
 
-void handle_kmeans(char* command, char* filepath){
+void run_kmeans(char* command, char* filepath){
     int k;
     char filename_kmeans[255]="kmeans-data.txt";
     handling_kmeans_args(command, &k, filename_kmeans);
@@ -98,11 +98,7 @@ int bind_and_listen(int port){ //return socket file descriptor
 
 void send_file(int cd, char* filepath, char* filename){
     //send filename
-    int msize = send(cd, filename, 255, 0);
-    if(msize < 0){
-        perror("Send filename failed");
-        exit(1);
-    }
+    send(cd, filename, 255, 0);
 
     FILE *file = fopen(filepath, "r");
     char buffer[255];

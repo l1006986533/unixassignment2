@@ -27,11 +27,11 @@ void handle_client(int cd){
         if (strncmp(command, "matinvpar", 9) == 0) {
             sprintf(filename,"matinv_client%d_soln%d.txt",ucn,matinv_sol_cnt++);
             sprintf(filepath,"../computed_results/%s",filename);
-            handle_matinv(command, filepath); // read the command, and write solution to filepath
+            run_matinv(command, filepath); // read the command, and write solution to filepath
         } else if (strncmp(command, "kmeanspar", 9) == 0) {
             sprintf(filename,"kmeans_client%d_soln%d.txt",ucn,kmeans_sol_cnt++);
             sprintf(filepath,"../computed_results/%s",filename);
-            handle_kmeans(command, filepath);
+            run_kmeans(command, filepath);
         } else{
             printf("Not start with matinvpar or kmeanspar\n");
             return;
