@@ -1,12 +1,7 @@
-#include <netinet/in.h> //structure for storing address information
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/types.h>
 #include <string.h>
-#include <arpa/inet.h>
-#include <netinet/tcp.h>
-#include <unistd.h>
+#include <netinet/in.h>
 #include <errno.h>
 #include "kmeans.h"
 #include "matrix_inverse.h"
@@ -16,21 +11,6 @@ void handle_client(int);
 
 int port=9999;
 int sd; //server file descriptor
-
-void bind_and_listen(){
-    sd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in servAddr;
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_port = htons(port);
-    servAddr.sin_addr.s_addr = INADDR_ANY;
-
-    if (bind(sd, (struct sockaddr *)&servAddr, sizeof(servAddr)) < 0) {
-        perror("bind failed");
-        exit(EXIT_FAILURE);
-    }
-    listen(sd, 1);
-    printf("Listening for clients...\n"); 
-}
 
 void server_fork(){
     while (1) {
@@ -53,8 +33,14 @@ void server_fork(){
 
 int is_socket_connected(int sock_fd) {
     char buffer[1];
-    int msize = recv(sock_fd, buffer, sizeof(buffer), MSG_PEEK);
-    if (msize == -1) {
+    int err = recv(sock_fd, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT);
+    if (err == -1) {
+        if (errno == ECONNRESET || errno == ENOTCONN || errno == ETIMEDOUT) {
+            return 0;
+        } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            return 1;
+        }
+    } else if (err == 0) {
         return 0;
     }
     return 1;
@@ -81,7 +67,7 @@ void send_file(int cd, char* filepath, char* filename){
 int main(int argc, char** argv)
 {
     handling_server_args(argc,argv,&port);
-    bind_and_listen();
+    sd = bind_and_listen(port);
     server_fork();
 }
 

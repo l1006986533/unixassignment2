@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 void handling_server_args(int argc, char** argv, int *port){
     char* prog = *argv;
@@ -76,4 +78,20 @@ void handle_kmeans(char* command, char* filepath){
     read_data(filename_kmeans);
     kmeans(k);  //k
     write_results(filepath);
+}
+
+int bind_and_listen(int port){ //return socket file descriptor
+    int sd = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in servAddr;
+    servAddr.sin_family = AF_INET;
+    servAddr.sin_port = htons(port);
+    servAddr.sin_addr.s_addr = INADDR_ANY;
+
+    if (bind(sd, (struct sockaddr *)&servAddr, sizeof(servAddr)) < 0) {
+        perror("bind failed");
+        exit(1);
+    }
+    listen(sd, 1);
+    printf("Listening for clients...\n"); 
+    return sd;
 }
