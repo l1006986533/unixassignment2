@@ -53,22 +53,10 @@ void server_fork(){
 
 int is_socket_connected(int sock_fd) {
     char buffer[1];
-    int err = recv(sock_fd, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT);
-
-    if (err == -1) {
-        if (errno == ECONNRESET || errno == ENOTCONN || errno == ETIMEDOUT) {
-            // socket is not connected
-            return 0;
-        } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            // no data available to read, socket may still be connected
-            return 1;
-        }
-    } else if (err == 0) {
-        // connection has been closed by the peer
+    int msize = recv(sock_fd, buffer, sizeof(buffer), MSG_PEEK);
+    if (msize == -1) {
         return 0;
     }
-
-    // socket is connected
     return 1;
 }
 
