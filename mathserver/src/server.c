@@ -6,37 +6,8 @@
 #include "kmeans.h"
 #include "matrix_inverse.h"
 
-void handle_client(int);
-
 int port=9999;
 int sd; //server file descriptor
-
-void server_fork(){
-    while (1) {
-        struct sockaddr_in address;
-        int addrlen = sizeof(address);
-        int cd = accept(sd, &address, &addrlen); // client file descriptor
-        if (cd < 0) {
-            perror("accept failed");
-            exit(EXIT_FAILURE);
-        }
-        if (fork() == 0) { // create child process
-            close(sd);
-            handle_client(cd);
-            exit(0);
-        }
-        // parent process
-        close(cd);
-    }
-}
-
-int main(int argc, char** argv)
-{
-    handling_server_args(argc,argv,&port);
-    sd = bind_and_listen(port);
-    server_fork();
-}
-
 
 void handle_client(int cd){
     // receiving unique_client_number
@@ -69,4 +40,30 @@ void handle_client(int cd){
         send_file(cd, filepath, filename);
     }
     printf("Client %d diconnect\n",ucn);
+}
+
+void server_fork(){
+    while (1) {
+        struct sockaddr_in address;
+        int addrlen = sizeof(address);
+        int cd = accept(sd, &address, &addrlen); // client file descriptor
+        if (cd < 0) {
+            perror("accept failed");
+            exit(EXIT_FAILURE);
+        }
+        if (fork() == 0) { // create child process
+            close(sd);
+            handle_client(cd);
+            exit(0);
+        }
+        // parent process
+        close(cd);
+    }
+}
+
+int main(int argc, char** argv)
+{
+    handling_server_args(argc,argv,&port);
+    sd = bind_and_listen(port);
+    server_fork();
 }
