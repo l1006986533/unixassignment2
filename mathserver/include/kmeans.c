@@ -37,7 +37,7 @@ void read_data(char* filename)
         fscanf(fp, "%f %f", &data[i].x, &data[i].y);
         data[i].cluster = -1; // Initialize the cluster number to -1
     }
-    printf("Read the problem data!\n");
+    // printf("Read the problem data!\n");
     // Initialize centroids randomly
     srand(0); // Setting 0 as the random number generation seed
     for (int i = 0; i < k; i++)
@@ -149,8 +149,8 @@ int kmeans(int k)
         somechange = assign_clusters_to_points();
         update_cluster_centers();
     } while (somechange);
-    printf("Number of iterations taken = %d\n", iter);
-    printf("Computed cluster numbers successfully!\n");
+    // printf("Number of iterations taken = %d\n", iter);
+    // printf("Computed cluster numbers successfully!\n");
 }
 
 void write_results(char* filename)
@@ -167,6 +167,6 @@ void write_results(char* filename)
             fprintf(fp, "%.2f %.2f %d\n", data[i].x, data[i].y, data[i].cluster);
         }
     }
-    printf("Wrote the results to a file!\n");
+    // printf("Wrote the results to a file!\n");
     fclose(fp);
 }
