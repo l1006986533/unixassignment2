@@ -5,7 +5,6 @@
 #include <errno.h>
 #include "kmeans.h"
 #include "matrix_inverse.h"
-#include "utils.h"
 
 void handle_client(int);
 
@@ -29,21 +28,6 @@ void server_fork(){
         // parent process
         close(cd);
     }
-}
-
-int is_socket_connected(int sock_fd) {
-    char buffer[1];
-    int err = recv(sock_fd, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT);
-    if (err == -1) {
-        if (errno == ECONNRESET || errno == ENOTCONN || errno == ETIMEDOUT) {
-            return 0;
-        } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            return 1;
-        }
-    } else if (err == 0) {
-        return 0;
-    }
-    return 1;
 }
 
 void send_file(int cd, char* filepath, char* filename){
@@ -80,11 +64,10 @@ void handle_client(int cd){
     printf("Connected with client %d\n",ucn);
 
     int matinv_sol_cnt = 1, kmeans_sol_cnt = 1;
-
-    while ( is_socket_connected(cd) )
+    char command[255];
+    while ( recv(cd, command, sizeof(command), 0) )
     {
-        char command[255];
-        recv(cd, command, sizeof(command), 0);
+        if(strncmp(command, "client_closing", 15) == 0) break;
         printf("Client %d commanded: %s", ucn, command);
 
         char filepath[255], filename[255];

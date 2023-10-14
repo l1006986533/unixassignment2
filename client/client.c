@@ -13,6 +13,14 @@ int port=9999;
 char ip[255]="127.0.0.1";
 int cd;
 
+void handle_sigint(int sig) 
+{ 
+    send(cd, "client_closing", 15, 0);
+    close(cd);
+    printf("\n");
+    exit(0);
+} 
+
 void connect_to_server(){
     cd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in servAddr;
@@ -73,6 +81,7 @@ void recv_file(int cd, char* filepath){
 
 int main(int argc, char const* argv[])
 {
+    signal(SIGINT, handle_sigint);
     char* prog = *argv;
     while (++argv, --argc > 0)
         if (**argv == '-'){
