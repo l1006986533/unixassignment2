@@ -96,10 +96,7 @@ int bind_and_listen(int port){ //return socket file descriptor
     return sd;
 }
 
-void send_file(int cd, char* filepath, char* filename){
-    //send filename
-    send(cd, filename, 255, 0);
-
+void send_file(int cd, char* filepath){
     FILE *file = fopen(filepath, "r");
     char buffer[255];
     while(!feof(file)){

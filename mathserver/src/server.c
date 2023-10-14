@@ -37,7 +37,8 @@ void handle_client(int cd){
             return;
         }
         printf("Sending solution: %s\n",filename);
-        send_file(cd, filepath, filename);
+        send(cd, filename, 255, 0);
+        send_file(cd, filepath);
     }
     printf("Client %d diconnect\n",ucn);
 }
