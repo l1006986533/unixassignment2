@@ -21,3 +21,4 @@ $(SERVER_TARGET): $(SERVER_SRC)
 
 clean:
 	$(RM) $(CLIENT_TARGET) $(SERVER_TARGET)
+	-rm -r client/results/* mathserver/computed_results/*
