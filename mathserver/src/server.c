@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 void handle_client(int cd){
     // receiving unique_client_number
     char string_ucn[255];
-    int nbytes = recv(cd, string_ucn, sizeof(string_ucn), 0);
+    recv(cd, string_ucn, sizeof(string_ucn), 0);
     int ucn=atoi(string_ucn);
     printf("Connected with client %d\n",ucn);
 
@@ -99,8 +99,7 @@ void handle_client(int cd){
     {
         // receiving command
         char command[255];
-        nbytes = recv(cd, command, sizeof(command), 0);
-        if(nbytes<=0) break;
+        recv(cd, command, sizeof(command), 0);
         printf("Client %d commanded: %s", ucn, command);
 
         char filepath[255], filename[255];

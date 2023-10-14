@@ -51,7 +51,6 @@ int get_unique_client_number() {
 
 void recv_file(int cd, char* filepath){
     FILE *file = fopen(filepath, "w");
-
     char buffer[255];
     while(1){
         int msize = recv(cd, buffer, 255, 0);
