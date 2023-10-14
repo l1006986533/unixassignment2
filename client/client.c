@@ -62,15 +62,7 @@ void recv_file(int cd, char* filepath){
     char buffer[255];
     while(1){
         int msize = recv(cd, buffer, 255, 0);
-        if(msize == -1){
-            perror("Receive file chunk failed");
-        }
-        else if(msize == 0){
-            break;
-        }else if(msize == 5 && memcmp(buffer, "MyEOF", 5) == 0){
-            break;
-        }
-        // Write the received chunk to the file
+        if(msize == 0 || (msize == 5 && memcmp(buffer, "MyEOF", 5) ) == 0) break;
         fwrite(buffer, 1, strlen(buffer), file);
     }
     fclose(file);
@@ -93,7 +85,7 @@ int main(int argc, char const* argv[])
                 printf("HELP: try %s -h \n\n", prog);
             }
         }
-    printf("DEBUG: ip:%s,and port:%d\n",ip,port);
+    // printf("DEBUG: ip:%s,and port:%d\n",ip,port);
     
     connect_to_server();
     int ucn=get_unique_client_number();

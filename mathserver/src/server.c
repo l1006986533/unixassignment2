@@ -36,7 +36,7 @@ void handle_client(int cd){
             printf("Not start with matinvpar or kmeanspar\n");
             return;
         }
-        printf("Sending solution: %s\n",filepath);
+        printf("Sending solution: %s\n",filename);
         send_file(cd, filepath, filename);
     }
     printf("Client %d diconnect\n",ucn);
