@@ -104,6 +104,7 @@ void send_file(int cd, char* filepath, char* filename){
     char buffer[255];
     while(!feof(file)){
         size_t bytesRead = fread(buffer, 1, 255, file);
+        if(bytesRead<255) buffer[bytesRead]='\0';
         send(cd, buffer, 255, 0);
     }
     fclose(file);

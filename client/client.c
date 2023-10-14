@@ -71,10 +71,7 @@ void recv_file(int cd, char* filepath){
             break;
         }
         // Write the received chunk to the file
-        size_t bytesWritten = fwrite(buffer, 1, msize, file);
-        if(bytesWritten < msize){
-            perror("Write file chunk failed");
-        }
+        fwrite(buffer, 1, strlen(buffer), file);
     }
     fclose(file);
 }
