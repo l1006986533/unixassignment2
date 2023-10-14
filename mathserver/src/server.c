@@ -30,24 +30,6 @@ void server_fork(){
     }
 }
 
-void send_file(int cd, char* filepath, char* filename){
-    //send filename
-    int msize = send(cd, filename, 255, 0);
-    if(msize < 0){
-        perror("Send filename failed");
-        exit(EXIT_FAILURE);
-    }
-
-    FILE *file = fopen(filepath, "r");
-    char buffer[255];
-    while(!feof(file)){
-        size_t bytesRead = fread(buffer, 1, 255, file);
-        send(cd, buffer, 255, 0);
-    }
-    fclose(file);
-    send(cd,"MyEOF",5,0);
-}
-
 int main(int argc, char** argv)
 {
     handling_server_args(argc,argv,&port);
