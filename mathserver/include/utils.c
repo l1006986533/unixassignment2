@@ -50,7 +50,7 @@ void handling_kmeans_args(char *command, int *k, char *filename_kmeans){
     char *token = strtok(command, " ");
     while (token != NULL) {
         if(strcmp(token,"-k")==0){
-            k = atoi(strtok(NULL, " "));
+            *k = atoi(strtok(NULL, " "));
         }else if(strcmp(token,"-f")==0){
             strcpy(filename_kmeans, strtok(NULL, " "));
         }
@@ -71,12 +71,9 @@ void run_matinv(char* command, char* filepath){
     Save_Matrix_Result_As_File(fp);
 }
 
-void run_kmeans(char* command, char* filepath){
-    int k;
-    char filename_kmeans[255]="kmeans-data.txt";
-    handling_kmeans_args(command, &k, filename_kmeans);
-    read_data(filename_kmeans);
-    kmeans(k);  //k
+void run_kmeans(int k, char* input_file, char* filepath){
+    read_data(input_file);
+    kmeans(k);
     write_results(filepath);
 }
 
@@ -106,4 +103,16 @@ void send_file(int cd, char* filepath){
     }
     fclose(file);
     send(cd,"MyEOF",5,0);
+}
+
+void recv_file(int cd, char* filepath){
+    FILE *file = fopen(filepath, "w");
+    char buffer[256];
+    buffer[255]='\0';
+    while(1){
+        int msize = recv(cd, buffer, 255, 0);
+        if(msize == 0 || (msize == 5 && memcmp(buffer, "MyEOF", 5) == 0 )) break;
+        fwrite(buffer, 1, strlen(buffer), file);
+    }
+    fclose(file);
 }

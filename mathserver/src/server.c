@@ -31,7 +31,17 @@ void handle_client(int cd){
         } else if (strncmp(command, "kmeanspar", 9) == 0) {
             sprintf(filename,"kmeans_client%d_soln%d.txt",ucn,kmeans_sol_cnt++);
             sprintf(filepath,"../computed_results/%s",filename);
-            run_kmeans(command, filepath);
+            int k;
+            char input_file[255]="kmeans-data.txt";
+            handling_kmeans_args(command, &k, input_file);
+
+            //receive input file
+            char temp[255];
+            sprintf(temp,"../computed_results/client%d-%s",ucn,input_file);
+            strcpy(input_file, temp);
+            recv_file(cd, input_file);
+
+            run_kmeans(k, input_file, filepath); //get the parameters k and input_file, and write solution to filepath
         } else{
             printf("Not start with matinvpar or kmeanspar\n");
             return;

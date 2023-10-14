@@ -59,13 +59,38 @@ int get_unique_client_number() {
 
 void recv_file(int cd, char* filepath){
     FILE *file = fopen(filepath, "w");
-    char buffer[255];
+    char buffer[256];
+    buffer[255]='\0';
     while(1){
         int msize = recv(cd, buffer, 255, 0);
-        if(msize == 0 || (msize == 5 && memcmp(buffer, "MyEOF", 5) ) == 0) break;
+        if(msize == 0 || (msize == 5 && memcmp(buffer, "MyEOF", 5) == 0 )) break;
         fwrite(buffer, 1, strlen(buffer), file);
     }
     fclose(file);
+}
+
+void send_file(int cd, char* filepath){
+    FILE *file = fopen(filepath, "r");
+    char buffer[255];
+    while(!feof(file)){
+        size_t bytesRead = fread(buffer, 1, 255, file);
+        if(bytesRead<255) buffer[bytesRead]='\0';
+        send(cd, buffer, 255, 0);
+    }
+    fclose(file);
+    send(cd,"MyEOF",5,0);
+}
+
+void handling_kmeans_args(char *command, int *k, char *filename_kmeans){
+    char *token = strtok(command, " ");
+    while (token != NULL) {
+        if(strcmp(token,"-k")==0){
+            k = atoi(strtok(NULL, " "));
+        }else if(strcmp(token,"-f")==0){
+            strcpy(filename_kmeans, strtok(NULL, " "));
+        }
+        token = strtok(NULL, " ");
+    }
 }
 
 int main(int argc, char const* argv[])
@@ -103,6 +128,16 @@ int main(int argc, char const* argv[])
         char command[255];
         fgets(command, sizeof(command), stdin);
         msize = send(cd, command, 255, 0);
+
+        if (strncmp(command, "kmeanspar", 9) == 0) {
+            //get input file
+            int k;
+            char input_file[255]="kmeans-data.txt";
+            handling_kmeans_args(command, &k, input_file);
+
+            // send kmeans input file
+            send_file(cd, input_file);
+        }
 
         char filename[255];
         msize = recv(cd, filename, 255, 0);
