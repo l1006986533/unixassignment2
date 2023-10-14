@@ -97,7 +97,6 @@ void handle_client(int cd){
 
     while ( is_socket_connected(cd) )
     {
-        // receiving command
         char command[255];
         recv(cd, command, sizeof(command), 0);
         printf("Client %d commanded: %s", ucn, command);
@@ -106,7 +105,7 @@ void handle_client(int cd){
         if (strncmp(command, "matinvpar", 9) == 0) {
             sprintf(filename,"matinv_client%d_soln%d.txt",ucn,matinv_sol_cnt++);
             sprintf(filepath,"../computed_results/%s",filename);
-            handle_matinv(command, filepath); // read the command, and write result to filepath
+            handle_matinv(command, filepath); // read the command, and write solution to filepath
         } else if (strncmp(command, "kmeanspar", 9) == 0) {
             sprintf(filename,"kmeans_client%d_soln%d.txt",ucn,kmeans_sol_cnt++);
             sprintf(filepath,"../computed_results/%s",filename);
