@@ -1,14 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
 #include <string.h>
-#include <arpa/inet.h>
-#include <dirent.h>
-#include <sys/stat.h>
 
-int port=9999;
+int port = 9999, cd;
 char ip[255]="127.0.0.1";
-int cd;
 
 void handle_sigint(int sig) 
 { 
@@ -22,13 +17,12 @@ int main(int argc, char const* argv[])
 {
     signal(SIGINT, handle_sigint);
     handling_client_args(argc, argv, &ip, &port);
-    // printf("DEBUG: ip:%s,and port:%d\n",ip,port);
     
     cd = connect_to_server(ip, port);
     int ucn=get_unique_client_number();
     char folder_path[255];
     sprintf(folder_path,"./results/client%d_results/",ucn);
-    mkdir(folder_path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    create_folder(folder_path);
 
     char string_ucn[255];
     sprintf(string_ucn, "%d", ucn);

@@ -2,6 +2,7 @@
 #include <netinet/in.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/stat.h>
 
 int connect_to_server(char* ip, int port){
     int cd = socket(AF_INET, SOCK_STREAM, 0);
@@ -91,4 +92,8 @@ void handling_client_args(int argc, char const* argv[], char* ip, int* port){
                 printf("HELP: try %s -h \n\n", prog);
             }
         }
+}
+
+void create_folder(char* folder_path){
+    mkdir(folder_path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 }
