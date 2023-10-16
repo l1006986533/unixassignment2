@@ -8,6 +8,7 @@
 
 int port=9999;
 int sd; //server file descriptor
+char originalWorkingDirectory[1024];
 
 void handle_client(int cd){
     // receiving unique_client_number
@@ -26,18 +27,18 @@ void handle_client(int cd){
         char filepath[255], filename[255];
         if (strncmp(command, "matinvpar", 9) == 0) {
             sprintf(filename,"matinv_client%d_soln%d.txt",ucn,matinv_sol_cnt++);
-            sprintf(filepath,"../computed_results/%s",filename);
+            sprintf(filepath,"%s/../computed_results/%s",originalWorkingDirectory,filename);
             run_matinv(command, filepath); // read the command, and write solution to filepath
         } else if (strncmp(command, "kmeanspar", 9) == 0) {
             sprintf(filename,"kmeans_client%d_soln%d.txt",ucn,kmeans_sol_cnt++);
-            sprintf(filepath,"../computed_results/%s",filename);
+            sprintf(filepath,"%s/../computed_results/%s",originalWorkingDirectory,filename);
             int k;
             char input_file[255]="kmeans-data.txt";
             handling_kmeans_args(command, &k, input_file);
 
             //receive input file
             char temp[255];
-            sprintf(temp,"../computed_results/client%d-%s",ucn,input_file);
+            sprintf(temp,"%s/../computed_results/client%d-%s",originalWorkingDirectory,ucn,input_file);
             strcpy(input_file, temp);
             recv_file(cd, input_file);
 
@@ -74,7 +75,7 @@ void server_fork(){
 
 int main(int argc, char** argv)
 {
-    handling_server_args(argc,argv,&port);
+    handling_server_args(argc,argv,&port,originalWorkingDirectory);
     sd = bind_and_listen(port);
     server_fork();
 }
