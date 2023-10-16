@@ -89,7 +89,7 @@ void Init_Matrix(FILE* fp)
                 I[row][col] = 1.0;
         }
     }
-
+    fprintf(fp,"Matrix Inverse\n");
     fprintf(fp, "\nsize      = %dx%d ", N, N);
     fprintf(fp, "\nmaxnum    = %d \n", maxnum);
     fprintf(fp, "Init	  = %s \n", Init);
@@ -126,6 +126,7 @@ void Init_Matrix(FILE* fp)
 
 void Save_Matrix_Result_As_File(FILE* fp){
     
+    fprintf(fp,"Inversed Matrix:\n");
     int row, col;
     for (row = 0; row < N; row++) {
         for (col = 0; col < N; col++)

@@ -42,7 +42,11 @@ int main(int argc, char const* argv[])
             handling_kmeans_args(command, &k, input_file);
             // send kmeans input file
             send_file(cd, input_file);
+        } else if (strncmp(command, "matinvpar", 9) != 0) {
+            printf("Not start with matinvpar or kmeanspar\n");
+            continue;
         }
+
 
         char filename[255];
         recv(cd, filename, 255, 0);

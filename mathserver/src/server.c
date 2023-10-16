@@ -44,7 +44,7 @@ void handle_client(int cd){
             run_kmeans(k, input_file, filepath); //get the parameters k and input_file, and write solution to filepath
         } else{
             printf("Not start with matinvpar or kmeanspar\n");
-            return;
+            continue;
         }
         printf("Sending solution: %s\n",filename);
         send(cd, filename, 255, 0);
