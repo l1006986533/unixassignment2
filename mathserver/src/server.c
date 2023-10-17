@@ -3,16 +3,22 @@
 #include <string.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <sys/epoll.h>
+#include <netdb.h>
 #include "kmeans.h"
 #include "matrix_inverse.h"
+
+#define DEBUG 1
 
 int port=9999;
 int server_socket;
 char originalWorkingDirectory[1024]="";
+char flag='f';
 
 int receive_ucn(int cd){
     char string_ucn[256];
     recv(cd, string_ucn, 255, 0);
+    if(DEBUG) printf("DEBUG: string_ucn %s\n",string_ucn);
     int ucn=atoi(string_ucn);
     return ucn;
 }
@@ -155,12 +161,25 @@ void server_select(){
     }
 }
 
+struct connect_data {
+    int fd;  // 文件描述符
+    int ucn; // ... 其他信息
+};
+
 void server_epoll(){
-    int server_socket, client_socket;
+    int client_socket;
     struct sockaddr_in address;
     int epoll_fd;
-    struct epoll_event event, events[30];
+    struct epoll_event event, events[31];
     char buffer[256];
+    int matinv_sol_cnt[31], kmeans_sol_cnt[31];
+
+    for (int i=0;i<31;i++){
+        events[i].data.ptr=NULL;
+        matinv_sol_cnt[i]=1;
+        kmeans_sol_cnt[i]=1;
+    }
+
     make_socket_non_blocking(server_socket);
     // 创建epoll实例
     epoll_fd = epoll_create1(0);
@@ -169,7 +188,10 @@ void server_epoll(){
         exit(EXIT_FAILURE);
     }
 
-    event.data.fd = server_socket;
+    struct connect_data *server_data = malloc(sizeof(struct connect_data));
+    server_data->fd=server_socket;
+    server_data->ucn=0;
+    event.data.ptr = server_data;
     event.events = EPOLLIN | EPOLLET;
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_socket, &event) == -1) {
         perror("epoll_ctl");
@@ -179,24 +201,29 @@ void server_epoll(){
     // 事件循环
     while(1) {
         int n, i;
-
         n = epoll_wait(epoll_fd, events, 30, -1);
         for (i = 0; i < n; i++) {
+            struct connect_data *my_connect_data = events[i].data.ptr;
+            int my_fd=0,ucn;
+            if(my_connect_data != NULL ){
+                my_fd = my_connect_data->fd;
+                ucn=my_connect_data->ucn;
+            }
+            if(DEBUG) printf("DEBUG: fd%d\n",my_fd);
             if (events[i].events & EPOLLERR ||
                 events[i].events & EPOLLHUP ||
                 !(events[i].events & EPOLLIN)) {
-                fprintf(stderr, "epoll error\n");
-                close(events[i].data.fd);
-                continue;
-            } else if (server_socket == events[i].data.fd) {
+                    fprintf(stderr, "epoll error\n");
+                    close(my_fd);
+                    continue;
+            } else if (server_socket == my_fd) {
                 // New connection coming
                 while (1) {
+                    if(DEBUG) printf("DEBUG:New connection coming\n");
                     struct sockaddr in_addr;
-                    socklen_t in_len;
+                    socklen_t in_len = sizeof(in_addr);
                     char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
-
-                    in_len = sizeof in_addr;
-                    client_socket = accept(server_socket, &in_addr, &in_len);
+                    client_socket = accept(server_socket, (struct sockaddr *)&in_addr, &in_len);
                     if (client_socket == -1) {
                         if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
                             break;
@@ -214,10 +241,15 @@ void server_epoll(){
                         printf("Accepted connection on descriptor %d (host=%s, port=%s)\n", client_socket, hbuf, sbuf);
                     }
 
+                    int ucncli= receive_ucn(client_socket);
+                    printf("DEBUG: ucn%d\n",ucncli);
+                    struct connect_data *my_client_data = malloc(sizeof(struct connect_data));
+                    my_client_data->fd=client_socket;
+                    my_client_data->ucn=ucncli;
                     // 设置为非阻塞模式
                     make_socket_non_blocking(client_socket);
-
-                    event.data.fd = client_socket;
+                    
+                    event.data.ptr = my_client_data;
                     event.events = EPOLLIN | EPOLLET;
                     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket, &event) == -1) {
                         perror("epoll_ctl");
@@ -228,11 +260,11 @@ void server_epoll(){
             } else {
                 // 处理客户端发来的数据
                 int done = 0;
-
                 while (1) {
                     ssize_t count;
-
-                    count = read(events[i].data.fd, buffer, 255);
+                    
+                    count = read(my_fd, buffer, 255);
+                    printf("DEBUG: buffer:%s, count:%d\n",buffer,count);
                     if (count == -1) {
                         if (errno != EAGAIN) {
                             perror("read");
@@ -244,13 +276,26 @@ void server_epoll(){
                         done = 1;
                         break;
                     }
-                    printf("%s\n",buffer);
+                    if(strncmp(buffer, "client_closing", 15) == 0) {
+                        done = 1;
+                        break;
+                    }
+                    printf("Client %d commanded: %s", ucn, buffer);
+                    char filepath[255], filename[255];
+                    int result = handle_command(my_fd, buffer, ucn, filename, filepath, &(matinv_sol_cnt[ucn]), &(kmeans_sol_cnt[ucn]));
+                    if(result == 0){
+                        printf("Sending solution: %s\n",filename);
+                        send(my_fd, filename, 255, 0);
+                        send_file(my_fd, filepath);
+                    }else if(result == 1){
+                        printf("Not start with matinvpar or kmeanspar\n");
+                    }
                     
                 }
 
                 if (done) {
-                    printf("Closed connection on descriptor %d\n", events[i].data.fd);
-                    close(events[i].data.fd);
+                    printf("Closed connection on descriptor %d\n", my_fd);
+                    close(my_fd);
                 }
             }
         }
@@ -259,7 +304,14 @@ void server_epoll(){
 
 int main(int argc, char** argv)
 {
-    handling_server_args(argc,argv,&port,originalWorkingDirectory);
+    handling_server_args(argc,argv,&port,originalWorkingDirectory,&flag);
     server_socket = bind_and_listen(port);
-    server_select();
+    if(DEBUG) printf("DEBUG: flag %c\n",flag);
+    if(flag=='f'){
+        server_fork();
+    }else if(flag=='s'){
+        server_select();
+    }else if(flag=='e'){
+        server_epoll();
+    }
 }

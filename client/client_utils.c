@@ -4,6 +4,8 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#define DEBUG 0
+
 int connect_to_server(char* ip, int port){
     int cd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in servAddr;
@@ -47,6 +49,11 @@ void recv_file(int cd, char* filepath){
     buffer[255]='\0';
     while(1){
         int msize = recv(cd, buffer, 255, 0);
+        if(msize!=255) 
+            if(DEBUG) printf("DEBUG:%d\n",msize);
+        buffer[msize]='\0';
+        if(memcmp(buffer, "MyEOF", 5) == 0 ) 
+            if(DEBUG) printf("DEBUG:%s\n",buffer);
         if(msize == 0 || (msize == 5 && memcmp(buffer, "MyEOF", 5) == 0 )) break;
         fwrite(buffer, 1, strlen(buffer), file);
     }

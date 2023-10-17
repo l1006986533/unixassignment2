@@ -7,7 +7,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-void handling_server_args(int argc, char** argv, int *port, char* originalWorkingDirectory){
+void handling_server_args(int argc, char** argv, int *port, char* originalWorkingDirectory,char* flag){
     char* prog = *argv;
     while (++argv, --argc > 0)
         if (**argv == '-')
@@ -31,6 +31,16 @@ void handling_server_args(int argc, char** argv, int *port, char* originalWorkin
                 daemonize("me");
                 break;
             case 's':
+                --argc;
+                char tmp[128];
+                strcpy(tmp, *(++argv));
+                if(strcmp(tmp,"fork")==0){
+                    *flag='f';
+                }else if(strcmp(tmp,"muxbasic")==0){
+                    *flag='s';
+                }else if(strcmp(tmp,"muxscale")==0){
+                    *flag='e';
+                }
                 break;
             default:
                 printf("%s: ignored option: -%s\n", prog, *argv);
@@ -121,6 +131,7 @@ void recv_file(int cd, char* filepath){
     while(1){
         int msize = recv(cd, buffer, 255, 0);
         if(msize == 0 || (msize == 5 && memcmp(buffer, "MyEOF", 5) == 0 )) break;
+        buffer[msize]='\0';
         fwrite(buffer, 1, strlen(buffer), file);
     }
     fclose(file);

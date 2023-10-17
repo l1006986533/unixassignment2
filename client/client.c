@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 int port = 9999, cd;
 char ip[255]="127.0.0.1";
