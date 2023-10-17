@@ -155,6 +155,108 @@ void server_select(){
     }
 }
 
+void server_epoll(){
+    int server_socket, client_socket;
+    struct sockaddr_in address;
+    int epoll_fd;
+    struct epoll_event event, events[30];
+    char buffer[256];
+    make_socket_non_blocking(server_socket);
+    // 创建epoll实例
+    epoll_fd = epoll_create1(0);
+    if (epoll_fd == -1) {
+        perror("epoll_create1");
+        exit(EXIT_FAILURE);
+    }
+
+    event.data.fd = server_socket;
+    event.events = EPOLLIN | EPOLLET;
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_socket, &event) == -1) {
+        perror("epoll_ctl");
+        exit(EXIT_FAILURE);
+    }
+
+    // 事件循环
+    while(1) {
+        int n, i;
+
+        n = epoll_wait(epoll_fd, events, 30, -1);
+        for (i = 0; i < n; i++) {
+            if (events[i].events & EPOLLERR ||
+                events[i].events & EPOLLHUP ||
+                !(events[i].events & EPOLLIN)) {
+                fprintf(stderr, "epoll error\n");
+                close(events[i].data.fd);
+                continue;
+            } else if (server_socket == events[i].data.fd) {
+                // New connection coming
+                while (1) {
+                    struct sockaddr in_addr;
+                    socklen_t in_len;
+                    char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+
+                    in_len = sizeof in_addr;
+                    client_socket = accept(server_socket, &in_addr, &in_len);
+                    if (client_socket == -1) {
+                        if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+                            break;
+                        } else {
+                            perror("accept");
+                            break;
+                        }
+                    }
+
+                    // 打印客户端信息
+                    if (getnameinfo(&in_addr, in_len,
+                                    hbuf, sizeof hbuf,
+                                    sbuf, sizeof sbuf,
+                                    NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
+                        printf("Accepted connection on descriptor %d (host=%s, port=%s)\n", client_socket, hbuf, sbuf);
+                    }
+
+                    // 设置为非阻塞模式
+                    make_socket_non_blocking(client_socket);
+
+                    event.data.fd = client_socket;
+                    event.events = EPOLLIN | EPOLLET;
+                    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket, &event) == -1) {
+                        perror("epoll_ctl");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                continue;
+            } else {
+                // 处理客户端发来的数据
+                int done = 0;
+
+                while (1) {
+                    ssize_t count;
+
+                    count = read(events[i].data.fd, buffer, 255);
+                    if (count == -1) {
+                        if (errno != EAGAIN) {
+                            perror("read");
+                            done = 1;
+                        }
+                        break;
+                    } else if (count == 0) {
+                        // 客户端关闭连接
+                        done = 1;
+                        break;
+                    }
+                    printf("%s\n",buffer);
+                    
+                }
+
+                if (done) {
+                    printf("Closed connection on descriptor %d\n", events[i].data.fd);
+                    close(events[i].data.fd);
+                }
+            }
+        }
+    }
+}
+
 int main(int argc, char** argv)
 {
     handling_server_args(argc,argv,&port,originalWorkingDirectory);
