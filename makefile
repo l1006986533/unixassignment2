@@ -1,5 +1,5 @@
 # Define the compiler
-CC = gcc-13
+CC = gcc
 
 # Define the executable file 
 CLIENT_TARGET = client/client
