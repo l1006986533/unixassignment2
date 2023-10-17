@@ -8,7 +8,7 @@
 #include "kmeans.h"
 #include "matrix_inverse.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 int port=9999;
 int server_socket;
