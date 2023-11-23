@@ -42,8 +42,8 @@ int handle_command(int cd, char* command, int ucn, char* filename, char* filepat
         //receive input file
         char temp[255];
         if(originalWorkingDirectory[0]=='\0')
-            sprintf(temp,"../computed_results/client%d-%s",ucn,input_file);
-        else sprintf(temp,"%s/../computed_results/client%d-%s",originalWorkingDirectory,ucn,input_file);
+            sprintf(temp,"../computed_results/client%d_input_%s",ucn,input_file);
+        else sprintf(temp,"%s/../computed_results/client%d_input_%s",originalWorkingDirectory,ucn,input_file);
         strcpy(input_file, temp);
         recv_file(cd, input_file);
         run_kmeans(k, input_file, filepath); //get the parameters k and input_file, and write solution to filepath

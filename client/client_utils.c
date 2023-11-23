@@ -6,6 +6,21 @@
 
 #define DEBUG 0
 
+void remove_newline(char *str) {
+    int i, j;
+    int len = strlen(str);
+    for (i = 0; i < len; i++) {
+        if (str[i] == '\n') {
+            // Shift the rest of the string one position to the left
+            for (j = i; j < len; j++) {
+                str[j] = str[j + 1];
+            }
+            len--;  // Decrease the length of the string
+            i--;    // Adjust index to recheck the current position
+        }
+    }
+}
+
 int connect_to_server(char* ip, int port){
     int cd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in servAddr;
@@ -79,6 +94,7 @@ void handling_kmeans_args(char *command, int *k, char *filename_kmeans){
             *k = atoi(strtok(NULL, " "));
         }else if(strcmp(token,"-f")==0){
             strcpy(filename_kmeans, strtok(NULL, " "));
+            remove_newline(filename_kmeans);
         }
         token = strtok(NULL, " ");
     }
@@ -91,6 +107,7 @@ void handling_client_args(int argc, char const* argv[], char* ip, int* port){
             if(strcmp(*argv,"-ip")==0){
                 --argc;
                 strcpy(ip, *++argv);
+                remove_newline(ip);
             }else if(strcmp(*argv,"-p")==0){
                 --argc;
                 *port = atoi(*++argv);

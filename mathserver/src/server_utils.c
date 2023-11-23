@@ -7,6 +7,21 @@
 #include <signal.h>
 #include <unistd.h>
 
+void remove_newline(char *str) {
+    int i, j;
+    int len = strlen(str);
+    for (i = 0; i < len; i++) {
+        if (str[i] == '\n') {
+            // Shift the rest of the string one position to the left
+            for (j = i; j < len; j++) {
+                str[j] = str[j + 1];
+            }
+            len--;  // Decrease the length of the string
+            i--;    // Adjust index to recheck the current position
+        }
+    }
+}
+
 void handling_server_args(int argc, char** argv, int *port, char* originalWorkingDirectory,char* flag){
     char* prog = *argv;
     while (++argv, --argc > 0)
@@ -56,6 +71,7 @@ void handling_matinv_args(char *command, int *problemsize, int *p, int *max_num,
             *problemsize = atoi(strtok(NULL, " "));
         }else if(strcmp(token,"-I")==0){
             strcpy(Initway, strtok(NULL, " "));
+            remove_newline(Initway);
         }else if(strcmp(token,"-P")==0){
             *p = atoi(strtok(NULL, " "));
         }else if(strcmp(token,"-m")==0){
@@ -72,6 +88,7 @@ void handling_kmeans_args(char *command, int *k, char *filename_kmeans){
             *k = atoi(strtok(NULL, " "));
         }else if(strcmp(token,"-f")==0){
             strcpy(filename_kmeans, strtok(NULL, " "));
+            remove_newline(filename_kmeans);
         }
         token = strtok(NULL, " ");
     }
