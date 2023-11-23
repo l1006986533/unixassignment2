@@ -91,8 +91,8 @@ void run_matinv(char* command, char* filepath){
 }
 
 void run_kmeans(int k, char* input_file, char* filepath){
-    read_data(input_file);
-    kmeans(k);
+    read_data(input_file, k);
+    kmeans();
     write_results(filepath);
 }
 

@@ -20,10 +20,9 @@ int k;      // number of centroids
 point data[MAX_POINTS];		// Data coordinates
 point cluster[MAX_CLUSTERS]; // The coordinates of each cluster center (also called centroid)
 
-void read_data(char* filename)
+void read_data(char* filename, int k2)
 {
-    N_points = 1797;
-    k = 9;
+    k = k2;
     FILE* fp = fopen(filename, "r");
     if (fp == NULL) {
         perror("Cannot open the file");
@@ -32,10 +31,11 @@ void read_data(char* filename)
    
     // Initialize points from the data file
     float temp;
-    for (int i = 0; i < N_points; i++)
+    N_points = 0;
+    while(fscanf(fp, "%f %f", &data[N_points].x, &data[N_points].y) != -1)
     {
-        fscanf(fp, "%f %f", &data[i].x, &data[i].y);
-        data[i].cluster = -1; // Initialize the cluster number to -1
+        data[N_points].cluster = -1; // Initialize the cluster number to -1
+        N_points++;
     }
     // printf("Read the problem data!\n");
     // Initialize centroids randomly
@@ -140,7 +140,7 @@ void update_cluster_centers() //c: N+k
     }
 }
 
-int kmeans(int k)
+void kmeans()
 {
     bool somechange;
     int iter = 0;
