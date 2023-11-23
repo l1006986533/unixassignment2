@@ -96,6 +96,7 @@ void Init_Matrix(FILE* fp)
     fprintf(fp, "Initializing matrix...");
 
     if (strcmp(Init, "rand") == 0) {
+        srand(0);
         for (row = 0; row < N; row++) {
             for (col = 0; col < N; col++) {
                 if (row == col) /* diagonal dominance */
@@ -135,6 +136,11 @@ void Save_Matrix_Result_As_File(FILE* fp){
     }
     fprintf(fp, "\n\n");
     fclose(fp);
+
+    for (row = 0; row < N; row++) {
+        for (col = 0; col < N; col++)
+            I[row][col]=0.0;
+    }
 }
 
 void Init_Default(int problemsize, char* Initway, int max_num, int p)
