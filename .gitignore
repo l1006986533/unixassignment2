@@ -3,3 +3,8 @@
 # executable file
 client/client
 mathserver/object/server
+
+original/kmeans
+original/matinv
+original/kmeans-results.jpg
+original/kmeans-results.txt
