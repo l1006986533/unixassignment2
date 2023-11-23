@@ -304,6 +304,12 @@ void server_epoll(){
 
 int main(int argc, char** argv)
 {
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    char* currentDirName = basename(cwd);
+    if (strcmp(currentDirName, "mathserver") != 0) {
+        chdir("./mathserver");
+    }
     handling_server_args(argc,argv,&port,originalWorkingDirectory,&flag);
     server_socket = bind_and_listen(port);
     if(DEBUG) printf("DEBUG: flag %c\n",flag);

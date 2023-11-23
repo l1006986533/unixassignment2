@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <libgen.h>
 
 int port = 9999, cd;
 char ip[255]="127.0.0.1";
@@ -16,6 +17,12 @@ void handle_sigint(int sig)
 
 int main(int argc, char const* argv[])
 {
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    char* currentDirName = basename(cwd);
+    if (strcmp(currentDirName, "client") != 0) {
+        chdir("./client");
+    }
     signal(SIGINT, handle_sigint);
     handling_client_args(argc, argv, &ip, &port);
     
