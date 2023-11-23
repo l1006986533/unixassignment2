@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <sys/epoll.h>
 #include <netdb.h>
+#include <libgen.h>
 #include "kmeans.h"
 #include "matrix_inverse.h"
 
