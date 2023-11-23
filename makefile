@@ -3,7 +3,7 @@ CC = gcc
 
 # Define the executable file 
 CLIENT_TARGET = client/client
-SERVER_TARGET = mathserver/object/server
+SERVER_TARGET = mathserver/server
 
 # Define the C source files
 CLIENT_SRC = client/client.c client/client_utils.c

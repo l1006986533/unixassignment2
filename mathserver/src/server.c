@@ -27,23 +27,23 @@ int handle_command(int cd, char* command, int ucn, char* filename, char* filepat
     if (strncmp(command, "matinvpar", 9) == 0) {
         sprintf(filename,"matinv_client%d_soln%d.txt",ucn,(*matinv_sol_cnt)++);
         if(originalWorkingDirectory[0]=='\0')
-            sprintf(filepath,"../computed_results/%s",filename);
-        else sprintf(filepath,"%s/../computed_results/%s",originalWorkingDirectory,filename);
+            sprintf(filepath,"computed_results/%s",filename);
+        else sprintf(filepath,"%s/computed_results/%s",originalWorkingDirectory,filename);
         run_matinv(command, filepath); // read the command, and write solution to filepath
         return 0;
     } else if (strncmp(command, "kmeanspar", 9) == 0) {
         sprintf(filename,"kmeans_client%d_soln%d.txt",ucn,(*kmeans_sol_cnt)++);
         if(originalWorkingDirectory[0]=='\0')
-            sprintf(filepath,"../computed_results/%s",filename);
-        else sprintf(filepath,"%s/../computed_results/%s",originalWorkingDirectory,filename);
+            sprintf(filepath,"computed_results/%s",filename);
+        else sprintf(filepath,"%s/computed_results/%s",originalWorkingDirectory,filename);
         int k;
         char input_file[255]="kmeans-data.txt";
         handling_kmeans_args(command, &k, input_file);
         //receive input file
         char temp[255];
         if(originalWorkingDirectory[0]=='\0')
-            sprintf(temp,"../computed_results/client%d_input_%s",ucn,input_file);
-        else sprintf(temp,"%s/../computed_results/client%d_input_%s",originalWorkingDirectory,ucn,input_file);
+            sprintf(temp,"computed_results/client%d_input_%s",ucn,input_file);
+        else sprintf(temp,"%s/computed_results/client%d_input_%s",originalWorkingDirectory,ucn,input_file);
         strcpy(input_file, temp);
         recv_file(cd, input_file);
         run_kmeans(k, input_file, filepath); //get the parameters k and input_file, and write solution to filepath
