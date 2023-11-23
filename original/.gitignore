@@ -1,7 +1,0 @@
-*
-
-!.gitignore
-!kmeans-data.txt
-!kmeans-viz.py
-!kmeans.c
-!matrix_inverse.c
